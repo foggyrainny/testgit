@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.PdModelMapper" >
+  <resultMap id="BaseResultMap" type="PdModel" >
+    <id column="MODEL_ID" property="model_id" jdbcType="BIGINT" />
+    <result column="MD_NAME" property="md_name" jdbcType="VARCHAR" />
+    <result column="PD_PRICE" property="pd_price" jdbcType="INTEGER" />
+    <result column="ORDER_SORT" property="order_sort" jdbcType="INTEGER" />
+    <result column="ADD_DATE" property="add_date" jdbcType="TIMESTAMP" />
+    <result column="DEL_MARK" property="del_mark" jdbcType="INTEGER" />
+    <result column="DEL_DATE" property="del_date" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    MODEL_ID, MD_NAME, PD_PRICE, ORDER_SORT, ADD_DATE, DEL_MARK, DEL_DATE
+  </sql>
+  
+  <sql id="getConditions">
+		<if test="md_name != null  and md_name != ''">and MD_NAME like CONCAT('%',#{md_name},'%')</if>
+		<if test="model_id != null  and model_id != ''">and MODEL_ID =#{model_id}</if>
+		<if test="order_sort != null and order_sort != ''">and USER_TYPE=#{order_sort}</if>
+		<if test="del_mark != null and del_mark != ''">and USER_STATE =#{del_mark}</if>
+	</sql>
+	
+	
+	<select id="getList" resultMap="BaseResultMap" parameterType="PdModel">
+		 select * from  pd_model
+		<where>
+			<include refid="getConditions"/>
+			
+		</where>
+			order by ORDER_SORT desc
+	</select>
+
+	<select id="getPaginatedList" resultMap="BaseResultMap" parameterType="PdModel">
+		select * from pd_model
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+	</select>
+
+	<select id="getCount" resultType="Integer" parameterType="PdModel">
+    select count(*) from pd_model 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  	</select>
+  
+  <select id="getOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from pd_model
+    where MODEL_ID = #{model_id,jdbcType=BIGINT}
+  </select>
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from pd_model
+    where MODEL_ID = #{model_id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert1" parameterType="PdModel" >
+    insert into pd_model (MODEL_ID, MD_NAME, PD_PRICE, 
+      ORDER_SORT, ADD_DATE, DEL_MARK, 
+      DEL_DATE)
+    values (#{modelId,jdbcType=BIGINT}, #{mdName,jdbcType=VARCHAR}, #{pdPrice,jdbcType=INTEGER}, 
+      #{orderSort,jdbcType=INTEGER}, #{addDate,jdbcType=TIMESTAMP}, #{delMark,jdbcType=INTEGER}, 
+      #{delDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insert" parameterType="PdModel" >
+    insert into pd_model
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="model_id != null" >
+        MODEL_ID,
+      </if>
+      <if test="md_name != null" >
+        MD_NAME,
+      </if>
+      <if test="pd_price != null" >
+        PD_PRICE,
+      </if>
+      <if test="order_sort != null" >
+        ORDER_SORT,
+      </if>
+      <if test="add_date != null" >
+        ADD_DATE,
+      </if>
+      <if test="del_mark != null" >
+        DEL_MARK,
+      </if>
+      <if test="del_date != null" >
+        DEL_DATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="model_id != null" >
+        #{model_id,jdbcType=BIGINT},
+      </if>
+      <if test="md_name != null" >
+        #{md_name,jdbcType=VARCHAR},
+      </if>
+      <if test="pd_price != null" >
+        #{pd_price,jdbcType=INTEGER},
+      </if>
+      <if test="order_sort != null" >
+        #{order_sort,jdbcType=INTEGER},
+      </if>
+      <if test="add_date != null" >
+        #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_mark != null" >
+        #{del_mark,jdbcType=INTEGER},
+      </if>
+      <if test="del_date != null" >
+        #{del_date,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="PdModel" >
+    update pd_model
+    <set >
+      <if test="md_name != null" >
+        MD_NAME = #{md_name,jdbcType=VARCHAR},
+      </if>
+      <if test="pd_price != null" >
+        PD_PRICE = #{pd_price,jdbcType=INTEGER},
+      </if>
+      <if test="order_sort != null" >
+        ORDER_SORT = #{order_sort,jdbcType=INTEGER},
+      </if>
+      <if test="add_date != null" >
+        ADD_DATE = #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_mark != null" >
+        DEL_MARK = #{del_mark,jdbcType=INTEGER},
+      </if>
+      <if test="del_date != null" >
+        DEL_DATE = #{del_date,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where MODEL_ID = #{model_id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="PdModel" >
+    update pd_model
+    set MD_NAME = #{mdName,jdbcType=VARCHAR},
+      PD_PRICE = #{pdPrice,jdbcType=INTEGER},
+      ORDER_SORT = #{orderSort,jdbcType=INTEGER},
+      ADD_DATE = #{addDate,jdbcType=TIMESTAMP},
+      DEL_MARK = #{delMark,jdbcType=INTEGER},
+      DEL_DATE = #{delDate,jdbcType=TIMESTAMP}
+    where MODEL_ID = #{modelId,jdbcType=BIGINT}
+  </update>
+</mapper>

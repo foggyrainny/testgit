@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.PdInfoMapper">
+	<resultMap id="selectPdInfoList" type="PdInfo">
+		<id column="PD_ID" property="pd_id" jdbcType="BIGINT"  />
+		<result column="UUID" property="uuid"  />
+		<result column="PD_NAME" property="pd_name" />
+		<result column="ENTP_ID" property="entp_id" jdbcType="BIGINT"/>
+		<result column="PD _TYPE" property="pd_type"  jdbcType="BIGINT"/>
+		<result column="MODEL_ID" property="model_id" jdbcType="BIGINT"/>
+		<result column="MAIN_IMAGE" property="main_image"  />
+		<result column="PRICE_REF" property="price_ref"  jdbcType="DECIMAL"/>
+		<result column="PD_NUM" property="pd_num"  />
+		<result column="VIEW_COUNT" property="view_count"  />
+		<result column="PD_DESC" property="pd_desc"  />
+		<result column="ORDER_VALUE" property="order_value"  />
+		<result column="IS_DEL" property="is_del"  />
+		<result column="DEL_TIME" property="del_time"  />
+		<result column="DEL_USER_ID" property="del_user_id" jdbcType="BIGINT"/>
+		<result column="AUDIT_STATE" property="audit_state"  />
+		<result column="AUDIT_USER_ID" property="audit_user_id"  />
+		<result column="AUDIT_TIME" property="audit_time"  />
+		<result column="AUDIT_DESC" property="audit_desc"  />
+	</resultMap>
+
+	<sql id="getConditions">
+		<if test="entp_id != null  and entp_id != ''">and ENTP_ID=#{entp_id}</if>
+		<if test="pd_name != null and pd_name != ''">and PD_NAME like CONCAT('%',#{pd_name},'%')</if>
+		<if test="pd_type != null and pd_type != ''">and PD_TYPE like CONCAT('%',#{pd_type},'%')</if>
+		<if test="audit_state != null and audit_state != ''">and AUDIT_STATE like CONCAT('%',#{audit_state},'%')</if>
+		<if test="pd_num != null and PD_NUM != ''">and PD_NUM =#{pd_num}</if>
+		<if test="price_ref != null and price_ref != ''">and PRICE_REF=#{price_ref}</if>
+		<if test="is_del!= null and is_del=''">and is_del=0</if>
+	</sql>
+
+	<select id="getList" resultMap="selectPdInfoList" parameterType="PdInfo">
+		select PD_ID, UUID,PD_NAME, ENTP_ID, PD_TYPE, MODEL_ID,MAIN_IMAGE,PRICE_REF,PD_NUM,
+		VIEW_COUNT,PD_DESC,ORDER_VALUE,IS_DEL,DEL_TIME,DEL_USER_ID,AUDIT_STATE,AUDIT_USER_ID,
+		AUDIT_TIME,AUDIT_DESC
+		from PD_INFO
+		<where>
+			<include refid="getConditions"/>
+		</where>
+	</select>
+
+<select id="getPaginatedList" resultMap="selectPdInfoList" parameterType="PdInfo">
+select * from PD_INFO
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+</select>
+
+<select id="getCount" resultType="Integer" parameterType="PdInfo">
+    select count(*) from PD_INFO 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  </select>
+
+	<select id="getOne" parameterType="BigInteger" resultType="PdInfo">
+		select PD_ID, UUID,PD_NAME, ENTP_ID, PD_TYPE, MODEL_ID,MAIN_IMAGE,PRICE_REF,PD_NUM,
+		VIEW_COUNT,PD_DESC,ORDER_VALUE,IS_DEL,DEL_TIME,DEL_USER_ID,AUDIT_STATE,AUDIT_USER_ID,
+		AUDIT_TIME,AUDIT_DESC
+		from PD_INFO where PD_ID=#{pd_id}
+	</select>
+	
+	<delete id="delete" parameterType="BigInteger">
+		delete from PD_INFO
+		where PD_ID = #{pd_id}
+	</delete>
+	
+	<insert id="insert" parameterType="PdInfo">
+		insert into PD_INFO
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="pd_id != null">PD_ID,</if>
+			<if test="uuid != null">UUID,</if>
+			<if test="pd_name != null">PD_NAME,</if>
+			<if test="entp_id != null">ENTP_ID,</if>
+			<if test="pd_type != null">PD_TYPE,</if>
+			<if test="model_id != null">MODEL_ID,</if>
+			<if test="main_image != null">MAIN_IMAGE,</if>
+			<if test="price_ref != null">PRICE_REF,</if>
+			<if test="pd_num != null">PD_NUM,</if>
+			<if test="view_count != null">VIEW_COUNT,</if>
+			<if test="pd_desc != null">PD_DESC,</if>
+			<if test="order_value != null">ORDER_VALUE,</if>
+			<if test="is_del != null">IS_DEL,</if>
+			<if test="del_time != null">DEL_TIME,</if>
+			<if test="del_user_id != null">DEL_USER_ID,</if>
+			<if test="audit_state != null">AUDIT_STATE,</if>
+			<if test="audit_user_id != null">AUDIT_USER_ID,</if>
+			<if test="audit_time != null">AUDIT_TIME,</if>
+			<if test="audit_desc != null">AUDIT_DESC</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="pd_id != null">#{pd_id},</if>
+			<if test="uuid != null">#{uuid},</if>
+			<if test="pd_name != null">#{pd_name},</if>
+			<if test="entp_id != null">#{entp_id},</if>
+			<if test="pd_type != null">#{pd_type},</if>
+			<if test="model_id != null">#{model_id},</if>
+			<if test="main_image != null">#{main_image},</if>
+			<if test="price_ref != null">#{price_ref},</if>
+			<if test="pd_num != null">#{pd_num},</if>
+			<if test="view_count != null">#{view_count},</if>
+			<if test="pd_desc != null">#{pd_desc},</if>
+			<if test="order_value != null">#{order_value},</if>
+			<if test="is_del != null">#{is_del},</if>
+			<if test="del_time != null">#{del_time},</if>
+			<if test="del_user_id != null">#{del_user_id},</if>
+			<if test="audit_state != null">#{audit_state},</if>
+			<if test="audit_user_id != null">#{audit_user_id},</if>
+			<if test="audit_time != null">#{audit_time},</if>
+			<if test="audit_desc != null">#{audit_desc}</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="PdInfo">
+		update PD_INFO
+		<set>
+			<if test="pd_id != null">PD_ID=#{pd_id},</if>
+			<if test="uuid != null">UUID=#{uuid},</if>
+			<if test="pd_name != null">PD_NAME=#{pd_name},</if>
+			<if test="entp_id != null">ENTP_ID=#{entp_id},</if>
+			<if test="pd_type != null">PD_TYPE=#{pd_type},</if>
+			<if test="model_id != null">MODEL_ID=#{model_id},</if>
+			<if test="main_image != null">MAIN_IMAGE=#{main_image},</if>
+			<if test="price_ref != null">PRICE_REF=#{price_ref},</if>
+			<if test="pd_num != null">PD_NUM=#{pd_num},</if>
+			<if test="view_count != null">VIEW_COUNT=#{view_count},</if>
+			<if test="pd_desc != null">PD_DESC=#{pd_desc},</if>
+			<if test="order_value != null">ORDER_VALUE=#{order_value},</if>
+			<if test="is_del != null">IS_DEL=#{is_del},</if>
+			<if test="del_time != null">DEL_TIME=#{del_time},</if>
+			<if test="del_user_id != null">DEL_USER_ID=#{del_user_id},</if>
+			<if test="audit_state != null">AUDIT_STATE=#{audit_state},</if>
+			<if test="audit_user_id != null">AUDIT_USER_ID=#{audit_user_id},</if>
+			<if test="audit_time != null">AUDIT_TIME=#{audit_time},</if>
+			<if test="audit_desc != null">AUDIT_DESC=#{audit_desc}</if>
+		</set>
+		where PD_ID = #{pd_id}
+	</update>
+</mapper>

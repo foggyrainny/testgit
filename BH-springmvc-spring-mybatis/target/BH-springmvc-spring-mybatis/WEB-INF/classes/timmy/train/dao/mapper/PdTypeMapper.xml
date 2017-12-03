@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.PdTypeMapper" >
+  <resultMap id="BaseResultMap" type="PdType" >
+    <id column="PD_TYPE" property="pd_type" jdbcType="BIGINT" />
+    <result column="PD_NAME" property="pd_name" jdbcType="VARCHAR" />
+    <result column="ORDER_SORT" property="order_sort" jdbcType="INTEGER" />
+    <result column="ADD_DATE" property="add_date" jdbcType="TIMESTAMP" />
+    <result column="DEL_MARK" property="del_mark" jdbcType="INTEGER" />
+    <result column="DEL_DATE" property="del_date" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    PD_TYPE, PD_NAME, ORDER_SORT, ADD_DATE, DEL_MARK, DEL_DATE
+  </sql>
+  
+   <sql id="getConditions">
+		<if test="pd_name != null  and pd_name != ''">and PD_NAME like CONCAT('%',#{pd_name},'%')</if>
+		<if test="order_sort != null and order_sort != ''">and ORDER_SORT=#{order_sort}</if>
+		<if test="pd_type != null and pd_type != ''">and PD_TYPE=#{pd_type}</if>
+		
+	</sql>
+	
+	
+	<select id="getList" resultMap="BaseResultMap" parameterType="PdType">
+		 select * from  pd_type
+		<where>
+			<include refid="getConditions"/>
+		</where>
+	</select>
+
+	<select id="getPaginatedList" resultMap="BaseResultMap" parameterType="PdType">		
+	select * from pd_type
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+	</select>
+
+	<select id="getCount" resultType="Integer" parameterType="PdType">
+    select count(*) from pd_type 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  	</select>
+  
+  <select id="getOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from pd_type
+    where PD_TYPE = #{pd_type,jdbcType=BIGINT}
+  </select>
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from pd_type
+    where PD_TYPE = #{pd_type,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert1" parameterType="PdType" >
+    insert into pd_type (PD_TYPE, PD_NAME, ORDER_SORT, 
+      ADD_DATE, DEL_MARK, DEL_DATE
+      )
+    values (#{pdType,jdbcType=BIGINT}, #{pdName,jdbcType=VARCHAR}, #{orderSort,jdbcType=INTEGER}, 
+      #{addDate,jdbcType=TIMESTAMP}, #{delMark,jdbcType=INTEGER}, #{delDate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insert" parameterType="PdType" >
+    insert into pd_type
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="pd_type != null" >
+        PD_TYPE,
+      </if>
+      <if test="pd_name != null" >
+        PD_NAME,
+      </if>
+      <if test="order_sort != null" >
+        ORDER_SORT,
+      </if>
+      <if test="add_date != null" >
+        ADD_DATE,
+      </if>
+      <if test="del_mark != null" >
+        DEL_MARK,
+      </if>
+      <if test="del_date != null" >
+        DEL_DATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="pd_type != null" >
+        #{pd_type,jdbcType=BIGINT},
+      </if>
+      <if test="pd_name != null" >
+        #{pd_name,jdbcType=VARCHAR},
+      </if>
+      <if test="order_sort != null" >
+        #{order_sort,jdbcType=INTEGER},
+      </if>
+      <if test="add_date != null" >
+        #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_mark != null" >
+        #{del_mark,jdbcType=INTEGER},
+      </if>
+      <if test="del_date != null" >
+        #{del_date,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="PdType" >
+    update pd_type
+    <set >
+      <if test="pd_name != null" >
+        PD_NAME = #{pd_name,jdbcType=VARCHAR},
+      </if>
+      <if test="order_sort != null" >
+        ORDER_SORT = #{order_sort,jdbcType=INTEGER},
+      </if>
+      <if test="add_date != null" >
+        ADD_DATE = #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_mark != null" >
+        DEL_MARK = #{del_mark,jdbcType=INTEGER},
+      </if>
+      <if test="del_date != null" >
+        DEL_DATE = #{del_date,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where PD_TYPE = #{pd_type,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="PdType" >
+    update pd_type
+    set PD_NAME = #{pdName,jdbcType=VARCHAR},
+      ORDER_SORT = #{orderSort,jdbcType=INTEGER},
+      ADD_DATE = #{addDate,jdbcType=TIMESTAMP},
+      DEL_MARK = #{delMark,jdbcType=INTEGER},
+      DEL_DATE = #{delDate,jdbcType=TIMESTAMP}
+    where PD_TYPE = #{pdType,jdbcType=BIGINT}
+  </update>
+</mapper>

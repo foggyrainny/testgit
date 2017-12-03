@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.EntpMainMapper" >
+  <resultMap id="BaseResultMap" type="EntpMain" >
+    <id column="ENTP_ID" property="entp_id" jdbcType="BIGINT" />
+    <result column="ENTP_NAME" property="entp_name" jdbcType="VARCHAR" />
+    <result column="ENTP_SNAME" property="entp_sname" jdbcType="VARCHAR" />
+    <result column="ENTP_ENAME" property="entp_ename" jdbcType="VARCHAR" />
+    <result column="ENTP_TYPE" property="entp_type" jdbcType="INTEGER" />
+    <result column="MAIN_PD" property="main_pd" jdbcType="VARCHAR" />
+    <result column="ENTP_KIND" property="entp_kind" jdbcType="INTEGER" />
+    <result column="ENTP_SIZE" property="entp_size" jdbcType="VARCHAR" />
+    <result column="ENTP_LICENCE" property="entp_licence" jdbcType="VARCHAR" />
+    <result column="CORPORATION" property="corporation" jdbcType="VARCHAR" />
+    <result column="ADDR" property="addr" jdbcType="VARCHAR" />
+    <result column="POSTCODE" property="postcode" jdbcType="VARCHAR" />
+    <result column="LINKMAN" property="linkman" jdbcType="VARCHAR" />
+    <result column="TEL" property="tel" jdbcType="VARCHAR" />
+    <result column="FAX" property="fax" jdbcType="VARCHAR" />
+    <result column="EMAIL" property="email" jdbcType="VARCHAR" />
+    <result column="WWW" property="www" jdbcType="VARCHAR" />
+    <result column="ADD_DATE" property="add_date" jdbcType="TIMESTAMP" />
+    <result column="INFO_STATE" property="info_state" jdbcType="INTEGER" />
+    <result column="SQ_SERIAL" property="sq_serial" jdbcType="VARCHAR" />
+    <result column="DEL_DATE" property="del_date" jdbcType="TIMESTAMP" />
+    <result column="DEL_MAN" property="del_man" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ENTP_ID, ENTP_NAME, ENTP_SNAME, ENTP_ENAME, ENTP_TYPE, MAIN_PD, ENTP_KIND, ENTP_SIZE, 
+    ENTP_LICENCE, CORPORATION, ADDR, POSTCODE, LINKMAN, TEL, FAX, EMAIL, WWW, ADD_DATE, 
+    INFO_STATE, SQ_SERIAL, DEL_DATE, DEL_MAN
+  </sql>
+  
+  <sql id="getConditions">
+		<if test="entp_id != null  and entp_id != ''">and ENTP_ID=#{entp_id}</if>
+		<if test="entp_name != null and entp_name != ''">and ENTP_NAME like CONCAT('%',#{entp_name},'%')</if>
+		<if test="main_pd != null and main_pd != ''">and MAIN_PD like CONCAT('%',#{main_pd},'%')</if>
+		<if test="linkman != null and linkman != ''">and LINKMAN like CONCAT('%',#{linkman},'%')</if>
+		<if test="corporation != null and corporation != ''">and CORPORATION like CONCAT('%',#{corporation},'%')</if>
+		<if test="info_state != null ">and PD_NUM =#{info_state}</if>
+		
+	</sql>
+	
+	
+	<select id="getList" resultMap="BaseResultMap" parameterType="EntpMain">
+		 select  ENTP_ID, ENTP_NAME, ENTP_SNAME, ENTP_ENAME, ENTP_TYPE, MAIN_PD, ENTP_KIND, ENTP_SIZE, 
+    ENTP_LICENCE, CORPORATION, ADDR, POSTCODE, LINKMAN, TEL, FAX, EMAIL, WWW, ADD_DATE, 
+    INFO_STATE, SQ_SERIAL, DEL_DATE, DEL_MAN from entp_main
+		<where>
+			<include refid="getConditions"/>
+		</where>
+	</select>
+
+<select id="getPaginatedList" resultMap="BaseResultMap" parameterType="EntpMain">
+select * from entp_main
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+</select>
+
+<select id="getCount" resultType="Integer" parameterType="EntpMain">
+    select count(*) from entp_main 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  </select>
+
+  
+  <select id="getOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from entp_main
+    where ENTP_ID = #{entp_id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="falsedelete" ></select>
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from entp_main
+    where ENTP_ID = #{entp_id,jdbcType=BIGINT}
+  </delete>
+  
+ 
+  <insert id="insert" parameterType="EntpMain" >
+    insert into entp_main
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+     <!--  <if test="entp_id != null" > ENTP_ID,</if> -->
+     <if test="entp_name != null" > ENTP_NAME, </if>
+      <if test="entp_sname != null" > ENTP_SNAME, </if>
+      <if test="entp_ename != null" > ENTP_ENAME,</if>
+      <if test="entp_type != null" >ENTP_TYPE,</if>
+      <if test="main_pd != null" >MAIN_PD,</if>
+      <if test="entp_kind != null" > ENTP_KIND,</if>
+      <if test="entp_size != null" >ENTP_SIZE,</if>
+      <if test="entp_licence != null" >ENTP_LICENCE,</if>
+      <if test="corporation != null" >CORPORATION,</if>
+      <if test="addr != null" >ADDR, </if>
+       <if test="postcode != null" >POSTCODE,</if>
+      <if test="linkman != null" > LINKMAN, </if>
+      <if test="tel != null" >TEL,</if>
+      <if test="fax != null" > FAX,</if>
+      <if test="email != null" > EMAIL,</if>
+      <if test="www != null" > WWW,</if>
+      <if test="add_date != null" >ADD_DATE,</if>
+      <if test="info_state != null" >INFO_STATE,</if>
+      <if test="sq_serial != null" >SQ_SERIAL,</if>
+      <if test="del_date != null" > DEL_DATE,</if>
+      <if test="del_man != null" > DEL_MAN,</if> 
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    <!--   <if test="entp_id != null" >#{entp_id,jdbcType=BIGINT}, </if> -->
+      <if test="entp_name != null" > #{entp_name,jdbcType=VARCHAR},</if>
+      <if test="entp_sname != null" >#{entp_sname,jdbcType=VARCHAR},</if>
+      <if test="entp_ename != null" >#{entp_ename,jdbcType=VARCHAR}, </if>
+      <if test="entp_type != null" > #{entp_type,jdbcType=INTEGER},</if>
+      <if test="main_pd != null" > #{main_pd,jdbcType=VARCHAR},</if>
+      <if test="entp_kind != null" > #{entp_kind,jdbcType=INTEGER},</if>
+      <if test="entp_size != null" > #{entp_size,jdbcType=VARCHAR}, </if>
+      <if test="entp_licence != null" >#{entp_licence,jdbcType=VARCHAR},
+      </if>
+      <if test="corporation != null" >#{corporation,jdbcType=VARCHAR},
+      </if>
+      <if test="addr != null" >#{addr,jdbcType=VARCHAR},
+      </if>
+       <if test="postcode != null" >#{postcode,jdbcType=VARCHAR},
+      </if>
+      <if test="linkman != null" > #{linkman,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null" >#{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="fax != null" > #{fax,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >#{email,jdbcType=VARCHAR},
+      </if>
+      <if test="www != null" >#{www,jdbcType=VARCHAR},
+      </if>
+      <if test="add_date != null" > #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="info_state != null" > #{info_state,jdbcType=INTEGER},
+      </if>
+      <if test="sq_serial != null" > #{sq_serial,jdbcType=VARCHAR},
+      </if>
+      <if test="del_date != null" > #{del_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_man != null" > #{del_man,jdbcType=VARCHAR},
+      </if> 
+    </trim>
+  </insert>
+  <update id="update" parameterType="EntpMain" >
+    update entp_main
+    <set >
+      <if test="entp_name != null" >ENTP_NAME = #{entp_name,jdbcType=VARCHAR},
+      </if>
+      <if test="entp_sname != null" > ENTP_SNAME = #{entp_sname,jdbcType=VARCHAR},
+      </if>
+      <if test="entp_ename != null" >
+        ENTP_ENAME = #{entp_ename,jdbcType=VARCHAR},
+      </if>
+      <if test="entp_type != null" >ENTP_TYPE = #{entp_type,jdbcType=INTEGER},
+      </if>
+      <if test="main_pd != null" > MAIN_PD = #{main_pd,jdbcType=VARCHAR},
+      </if>
+      <if test="entp_kind != null" >
+        ENTP_KIND = #{entp_kind,jdbcType=INTEGER},
+      </if>
+      <if test="entp_size != null" >
+        ENTP_SIZE = #{entp_size,jdbcType=VARCHAR},
+      </if>
+      <if test="entp_licence != null" >
+        ENTP_LICENCE = #{entp_licence,jdbcType=VARCHAR},
+      </if>
+      <if test="corporation != null" >
+        CORPORATION = #{corporation,jdbcType=VARCHAR},
+      </if>
+      <if test="addr != null" >
+        ADDR = #{addr,jdbcType=VARCHAR},
+      </if>
+      <if test="postcode != null" >
+        POSTCODE = #{postcode,jdbcType=VARCHAR},
+      </if>
+      <if test="linkman != null" >
+        LINKMAN = #{linkman,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null" >
+        TEL = #{tel,jdbcType=VARCHAR},
+      </if>
+      <if test="fax != null" >
+        FAX = #{fax,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        EMAIL = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="www != null" >
+        WWW = #{www,jdbcType=VARCHAR},
+      </if>
+      <if test="add_date != null" >
+        ADD_DATE = #{add_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="info_state != null" >
+        INFO_STATE = #{info_state,jdbcType=INTEGER},
+      </if>
+      <if test="sq_serial != null" >
+        SQ_SERIAL = #{sq_serial,jdbcType=VARCHAR},
+      </if>
+      <if test="del_date != null" >
+        DEL_DATE = #{del_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="del_man != null" >
+        DEL_MAN = #{del_man,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ENTP_ID = #{entp_id,jdbcType=BIGINT}
+  </update>
+ 
+</mapper>
