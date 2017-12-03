@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/BH-springmvc-spring-mybatis.iml" filepath="$PROJECT_DIR$/BH-springmvc-spring-mybatis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javaweb/javaweb.iml" filepath="$PROJECT_DIR$/javaweb/javaweb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/target/tomcat/work/Tomcat/localhost/localhost.iml" filepath="$PROJECT_DIR$/target/tomcat/work/Tomcat/localhost/localhost.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/main/main.iml" filepath="$PROJECT_DIR$/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tets/tets.iml" filepath="$PROJECT_DIR$/tets/tets.iml" />
+    </modules>
+  </component>
+</project>

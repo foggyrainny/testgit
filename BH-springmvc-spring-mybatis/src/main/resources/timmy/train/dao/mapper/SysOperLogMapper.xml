@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.SysOperLogMapper" >
+  <resultMap id="BaseResultMap" type="SysOperLog" >
+    <id column="ID" property="id" jdbcType="BIGINT" />
+    <result column="OPER_TYPE" property="oper_type" jdbcType="VARCHAR" />
+    <result column="OPER_TIME" property="oper_time" jdbcType="TIMESTAMP" />
+    <result column="OPER_UID" property="oper_uid" jdbcType="BIGINT" />
+    <result column="OPER_UNAME" property="oper_uname" jdbcType="VARCHAR" />
+    <result column="OPER_UIP" property="oper_uip" jdbcType="VARCHAR" />
+    <result column="IS_DEL" property="is_del" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="SysOperLog" extends="BaseResultMap" >
+    <result column="OPER_MEMO" property="operMemo" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, OPER_TYPE, OPER_TIME, OPER_UID, OPER_UNAME, OPER_UIP, IS_DEL
+  </sql>
+  
+    <sql id="getConditions">
+		<if test="oper_type != null  and oper_type != ''">and OPER_TYPE like CONCAT('%',#{oper_type},'%')</if>
+		<if test="oper_uname != null  and oper_uname != ''">and OPER_UNAME like CONCAT('%',#{oper_uname},'%')</if>
+			
+	</sql>
+	
+	
+	<select id="getList" resultMap="BaseResultMap" parameterType="SysOperLog">
+		 select * from  sys_oper_log
+		<where>
+			<include refid="getConditions"/>
+		</where>
+	</select>
+
+	<select id="getPaginatedList" resultMap="BaseResultMap" parameterType="SysOperLog">		
+	select * from sys_oper_log
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+	</select>
+
+	<select id="getCount" resultType="Integer" parameterType="SysOperLog">
+    select count(*) from sys_oper_log 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  	</select>
+  
+  <sql id="Blob_Column_List" >
+    OPER_MEMO
+  </sql>
+  
+  <select id="getOne" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from sys_oper_log
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from sys_oper_log
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert1" parameterType="sysOperLog" >
+    insert into sys_oper_log (ID, OPER_TYPE, OPER_TIME, 
+      OPER_UID, OPER_UNAME, OPER_UIP, 
+      IS_DEL, OPER_MEMO)
+    values (#{id,jdbcType=BIGINT}, #{operType,jdbcType=VARCHAR}, #{operTime,jdbcType=TIMESTAMP}, 
+      #{operUid,jdbcType=BIGINT}, #{operUname,jdbcType=VARCHAR}, #{operUip,jdbcType=VARCHAR}, 
+      #{isDel,jdbcType=INTEGER}, #{operMemo,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insert" parameterType="SysOperLog" >
+    insert into sys_oper_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="oper_type != null" >
+        OPER_TYPE,
+      </if>
+      <if test="oper_time != null" >
+        OPER_TIME,
+      </if>
+      <if test="oper_uid != null" >
+        OPER_UID,
+      </if>
+      <if test="oper_uname != null" >
+        OPER_UNAME,
+      </if>
+      <if test="oper_uip != null" >
+        OPER_UIP,
+      </if>
+      <if test="is_del != null" >
+        IS_DEL,
+      </if>
+      <if test="oper_memo != null" >
+        OPER_MEMO,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="oper_type != null" >
+        #{oper_type,jdbcType=VARCHAR},
+      </if>
+      <if test="oper_time != null" >
+        #{oper_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="oper_uid != null" >
+        #{oper_uid,jdbcType=BIGINT},
+      </if>
+      <if test="oper_uname != null" >
+        #{oper_uname,jdbcType=VARCHAR},
+      </if>
+      <if test="oper_uip != null" >
+        #{oper_uip,jdbcType=VARCHAR},
+      </if>
+      <if test="is_del != null" >
+        #{is_del,jdbcType=INTEGER},
+      </if>
+      <if test="oper_memo != null" >
+        #{oper_memo,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="SysOperLog" >
+    update sys_oper_log
+    <set >
+      <if test="oper_type != null" >
+        OPER_TYPE = #{oper_type,jdbcType=VARCHAR},
+      </if>
+      <if test="oper_time != null" >
+        OPER_TIME = #{oper_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="oper_uid != null" >
+        OPER_UID = #{oper_uid,jdbcType=BIGINT},
+      </if>
+      <if test="oper_uname != null" >
+        OPER_UNAME = #{oper_uname,jdbcType=VARCHAR},
+      </if>
+      <if test="oper_uip != null" >
+        OPER_UIP = #{oper_uip,jdbcType=VARCHAR},
+      </if>
+      <if test="is_del != null" >
+        IS_DEL = #{is_del,jdbcType=INTEGER},
+      </if>
+      <if test="oper_memo != null" >
+        OPER_MEMO = #{oper_memo,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="SysOperLog" >
+    update sys_oper_log
+    set OPER_TYPE = #{operType,jdbcType=VARCHAR},
+      OPER_TIME = #{operTime,jdbcType=TIMESTAMP},
+      OPER_UID = #{operUid,jdbcType=BIGINT},
+      OPER_UNAME = #{operUname,jdbcType=VARCHAR},
+      OPER_UIP = #{operUip,jdbcType=VARCHAR},
+      IS_DEL = #{isDel,jdbcType=INTEGER},
+      OPER_MEMO = #{operMemo,jdbcType=LONGVARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="SysOperLog" >
+    update sys_oper_log
+    set OPER_TYPE = #{operType,jdbcType=VARCHAR},
+      OPER_TIME = #{operTime,jdbcType=TIMESTAMP},
+      OPER_UID = #{operUid,jdbcType=BIGINT},
+      OPER_UNAME = #{operUname,jdbcType=VARCHAR},
+      OPER_UIP = #{operUip,jdbcType=VARCHAR},
+      IS_DEL = #{isDel,jdbcType=INTEGER}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

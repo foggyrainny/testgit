@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="timmy.train.dao.mapper.EntpUserMapper" >
+  <resultMap id="BaseResultMap" type="EntpUser" >
+    <id column="USER_ID" property="user_id" jdbcType="BIGINT" />
+    <result column="USER_NAME" property="user_name" jdbcType="VARCHAR" />
+    <result column="PASS_WORD" property="pass_word" jdbcType="VARCHAR" />
+    <result column="USER_TYPE" property="user_type" jdbcType="INTEGER" />
+    <result column="ENTP_ID" property="entp_id" jdbcType="BIGINT" />
+    <result column="REALNAME" property="realname" jdbcType="VARCHAR" />
+    <result column="USER_STATE" property="user_state" jdbcType="INTEGER" />
+    <result column="LAST_LOGIN_TIME" property="last_login_time" jdbcType="TIMESTAMP" />
+    <result column="LAST_LOGIN_IP" property="last_login_ip" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    USER_ID, USER_NAME, PASS_WORD, USER_TYPE, ENTP_ID, REALNAME, USER_STATE, LAST_LOGIN_TIME, 
+    LAST_LOGIN_IP
+  </sql>
+  
+  <sql id="getConditions">
+		<if test="user_name != null  and user_name != ''">and USER_NAME like CONCAT('%',#{user_name},'%')</if>
+		<if test="user_type != null and user_type != ''">and USER_TYPE=#{user_type}</if>
+		<if test="realname != null and realname != ''">and REALNAME like CONCAT('%',#{realname},'%')</if>
+		<if test="user_state != null and user_state != ''">and USER_STATE =#{user_state}</if>
+	</sql>
+	
+	
+	<select id="getList" resultMap="BaseResultMap" parameterType="EntpUser">
+		 select * from  entp_user
+		<where>
+			<include refid="getConditions"/>
+		</where>
+	</select>
+
+	<select id="getPaginatedList" resultMap="BaseResultMap" parameterType="EntpUser">
+		select * from entp_user
+	<where>
+		<include refid="getConditions" /> 
+	</where>
+ 	<if test="map.first !=null and map.count">limit ${map.first}, ${map.count}</if>  	
+	</select>
+
+	<select id="getCount" resultType="Integer" parameterType="EntpUser">
+    select count(*) from entp_user 
+    <where>
+    	<include refid="getConditions" /> 
+    </where>
+  	</select>
+
+  <select id="getOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from entp_user
+    where USER_ID = #{user_id,jdbcType=BIGINT}
+  </select>
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from entp_user
+    where USER_ID = #{user_id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert1" parameterType="EntpUser" >
+    insert into entp_user (USER_ID, USER_NAME, PASS_WORD, 
+      USER_TYPE, ENTP_ID, REALNAME, 
+      USER_STATE, LAST_LOGIN_TIME, LAST_LOGIN_IP
+      )
+    values (#{userId,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, #{passWord,jdbcType=VARCHAR}, 
+      #{userType,jdbcType=INTEGER}, #{entpId,jdbcType=BIGINT}, #{realname,jdbcType=VARCHAR}, 
+      #{userState,jdbcType=INTEGER}, #{lastLoginTime,jdbcType=TIMESTAMP}, #{lastLoginIp,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insert" parameterType="EntpUser" >
+    insert into entp_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        USER_ID,
+      </if>
+      <if test="user_name != null" >
+        USER_NAME,
+      </if>
+      <if test="pass_word != null" >
+        PASS_WORD,
+      </if>
+      <if test="user_type != null" >
+        USER_TYPE,
+      </if>
+      <if test="entp_id != null" >
+        ENTP_ID,
+      </if>
+      <if test="realname != null" >
+        REALNAME,
+      </if>
+      <if test="user_state != null" >
+        USER_STATE,
+      </if>
+      <if test="last_login_time != null" >
+        LAST_LOGIN_TIME,
+      </if>
+      <if test="last_login_ip != null" >
+        LAST_LOGIN_IP,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        #{user_id,jdbcType=BIGINT},
+      </if>
+      <if test="user_name != null" >
+        #{user_name,jdbcType=VARCHAR},
+      </if>
+      <if test="pass_word != null" >
+        #{pass_word,jdbcType=VARCHAR},
+      </if>
+      <if test="user_type != null" >
+        #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="entp_id != null" >
+        #{entp_id,jdbcType=BIGINT},
+      </if>
+      <if test="realname != null" >
+        #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="user_state != null" >
+        #{user_state,jdbcType=INTEGER},
+      </if>
+      <if test="last_login_time != null" >
+        #{last_login_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="last_login_ip != null" >
+        #{last_login_ip,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="EntpUser" >
+    update entp_user
+    <set >
+      <if test="user_name != null" >
+        USER_NAME = #{user_name,jdbcType=VARCHAR},
+      </if>
+      <if test="pass_word != null" >
+        PASS_WORD = #{pass_word,jdbcType=VARCHAR},
+      </if>
+      <if test="user_type != null" >
+        USER_TYPE = #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="entp_id != null" >
+        ENTP_ID = #{entp_id,jdbcType=BIGINT},
+      </if>
+      <if test="realname != null" >
+        REALNAME = #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="user_state != null" >
+        USER_STATE = #{user_state,jdbcType=INTEGER},
+      </if>
+      <if test="last_login_time != null" >
+        LAST_LOGIN_TIME = #{last_login_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="last_login_ip != null" >
+        LAST_LOGIN_IP = #{last_login_ip,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where USER_ID = #{user_id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="EntpUser" >
+    update entp_user
+    set USER_NAME = #{userName,jdbcType=VARCHAR},
+      PASS_WORD = #{passWord,jdbcType=VARCHAR},
+      USER_TYPE = #{userType,jdbcType=INTEGER},
+      ENTP_ID = #{entpId,jdbcType=BIGINT},
+      REALNAME = #{realname,jdbcType=VARCHAR},
+      USER_STATE = #{userState,jdbcType=INTEGER},
+      LAST_LOGIN_TIME = #{lastLoginTime,jdbcType=TIMESTAMP},
+      LAST_LOGIN_IP = #{lastLoginIp,jdbcType=VARCHAR}
+    where USER_ID = #{userId,jdbcType=BIGINT}
+  </update>
+</mapper>
