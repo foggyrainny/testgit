@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
+          "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<struts-config>
+	<!-- 封装页面数据的ActionForm子类 -->
+	<form-beans> 
+	   <!--  <form-bean name="usersForm" type="timmy.daomain.UsersForm"/> --> 
+	    <form-bean name="messageForm" type="timmy.daomain.MessageForm"/>     
+	</form-beans>
+ 	<action-mappings>
+ 		<!-- 登录页面 -->
+      <!--  <action path="/login" 
+       			name="usersForm"
+       			type="timmy.action.LoginAction"  
+           		scope="request"
+           		validate="false"
+           		>  
+           <forward name="success" path="/MessageAction" redirect="true"/>  
+           <forward name="failure" path="/login.jsp" />  
+       </action> -->
+       <!--显示页面  -->
+       <action path="/message" 
+       			name="messageForm"
+       			type="timmy.action.MessageAction"
+       			parameter="method"  
+           		scope="request"
+           		validate="false"
+           		>  
+           <forward name="list" path="/list.jsp"/>
+           <forward name="delete" path="/message.do" redirect="true"/>
+           <forward name="add" path="/input.jsp"/>
+           <forward name="edit" path="/input.jsp"/>
+           <forward name="save" path="/message.do" redirect="true"/>    
+       </action>
+       
+   </action-mappings>  
+	
+
+</struts-config>
