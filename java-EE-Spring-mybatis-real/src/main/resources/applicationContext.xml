@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+        default-autowire="byName" default-lazy-init="true">
+	<description>Spring公共配置 </description>
+	
+	<!-- 1、配置自动扫描包:  方便使用注解
+		使用annotation 自动注册bean, 并保证@Required、@Autowired的属性被注入 -->
+	 <context:component-scan base-package="raky.train" /> 
+	
+	<!-- 2、导入资源文件（jdbc属性配置文件） -->
+	<context:property-placeholder location="classpath:application.properties" />
+
+	<!-- 3、配置dataSource数据源对象：   dbcp 数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<property name="maxActive" value="${dbcp.maxActive}" />
+		<property name="maxIdle" value="${dbcp.maxIdle}" />
+		<property name="defaultAutoCommit" value="false" />
+
+		<property name="timeBetweenEvictionRunsMillis" value="3600000" />
+		<property name="minEvictableIdleTimeMillis" value="3600000" />
+	</bean>
+
+	<!-- 4、spring 集成mybatis的配置
+		    代替了mybatis的主配置文件 mybatis-config.xml
+		    dataSource  注入数据源
+		    
+		    mapperLocations 导入模块的配置文件  通配符   导入所有模块的配置文件
+	
+		myBatis SqlSessionFactory对象 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />		
+		<!-- <property name="typeAliasesPackage" value="cn.goodjobs.cms.domain" /> -->
+		<property name="mapperLocations" value="classpath*:mybatis/mapper/*Mapper.xml" />
+	</bean>
+	<!-- sqlSessionTemplate 对mybatis的SqlSession对象的封装、包装 -->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"> 
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 5、aop 针对事务进行通用配置   代码中不用去单独编写事务代码 -->
+
+	<!-- 定义事务管理器   注入数据源dataSource
+			事务是放在service服务层，不能放在到dao层
+			
+			一个业务：产品表插入，订单表插入
+			service层：事务的业务操作，一个业务会涉及到对多张表的操作
+			createProduct(){
+				产品表插入
+				订单表插入
+			}
+			
+			dao层:  事务的原子操作，一次只针对一张表的操作（一条sql语句）
+				insertProduct(){
+					产品表插入
+				}
+				insertOrder(){
+					订单表插入
+				}
+			
+			
+			
+	 --> 
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+         <property name="dataSource" ref="dataSource" />  
+    </bean>
+	<!-- 下面使用aop切面的方式来实现  事务通知： 针对具体的方法进行切入点设置 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		 <!--配置事务传播性，隔离级别以及超时回滚等问题 -->
+		<tx:attributes> <!-- 定位到具体的方法 -->
+			<tx:method name="create*" /> <!-- 以create开发的方法使用事务 -->
+			<tx:method name="modify*" />
+			<tx:method name="remove*" />			
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config proxy-target-class="true">
+		<!--配置事务切点   定位到具体的类  -->
+		<aop:pointcut id="txPointcut" expression="execution(* raky.train.service.*Service.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config>
+	
+	<!-- cglib 针对aop功能的增强 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+</beans>
