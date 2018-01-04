@@ -1,19 +1,16 @@
-(function($)  {
+(function($){
 $.extend($.fn.validatebox.defaults.rules,{
     account:{
         validator:function (value,param) {
             if(!/^(?![0-9]+$)(?![A-Za-z]+$)(?!\_+$)[a-zA-Z0-9_]+$/.test(value)){
                 $.fn.validatebox.defaults.rules.account.message="格式错误，密码必须是字母，数字，下划线中的两种及两种以上";
-                fg=false;
                 return false;
             }else {
                 if(value.length>param[1]||value.length<param[0]){
-                    $.fn.validatebox.defaults.rules.account.message="密码长度必须在"+param[0]+"至"+param[1]+"范围";
-                    fg=false;
+                    $.fn.validatebox.defaults.rules.account.message="密码长度必须在"+param[0]+"至"+param[1]+"个字符范围";
                     return false;
 
                 }else {
-                    fg=true;
                     return true;
 
                 }
@@ -93,8 +90,44 @@ $.extend($.fn.validatebox.defaults.rules,{
             }
         },message:""
 
+    },
+    radio:{
+        validator:function (value,param) {
+            var groupname=param[1],fg=false;
+            $('input[name="'+groupname+'"]',$("#ff")).each(
+                function () {
+                   if(this.checked){
+                       fg=true;
+                       return false;
+                   }
+                });
+            return  fg;
+        },message:"请选择性别"
+    },
+    checkbox:{
+        validator:function (value,param) {
+            var groupname=param[1],checkNum=0;
+            $('input[name="'+groupname+'"]',$("#ff")).each(
+                function () {
+                    if(this.checked)
+                        checkNum++;
+                });
+            return  checkNum==1;
+
+        },message:"您还未同意《中国铁路客户服务中心网站服务条款》"
     }
-
-
 });
+    $.extend($.fn.validatebox.methods, {
+        remove: function(jq, newposition){
+            return jq.each(function(){
+                $(this).removeClass("validatebox-text validatebox-invalid").unbind('focus').unbind('blur');
+            });
+        },
+        recover: function(jq, newposition){
+            return jq.each(function(){
+                var opt = $(this).data().validatebox.options;
+                $(this).addClass("validatebox-text").validatebox(opt);
+            });
+        }
+    });
 })(jQuery);
