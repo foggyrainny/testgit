@@ -26,14 +26,16 @@
 <div style="margin:10px 0;"></div>
 
 <div class="easyui-panel" title="注册" style="width:800px;padding:45px" >
-<form id="ff"  method="post" >
+<form id="ff"  method="post" aciton="Register.do">
     <table align="center">
             <tr>
                 <td align="right">用户名：</td>
                 <td>
                     <input type="text" class="easyui-validatebox" data-options="required:true,validType:'name'"
-                           placeholder="用户名设置成功后不可修改" name="name" id="uName" maxlength="30" missingMessage="">
+                           placeholder="用户名设置成功后不可修改" name="name" id="uName" maxlength="30" missingMessage=""
+                   onchange="repeat(this)">
                    <span style="color: #FF7F00">6至30位字母数字或“_”,字母开头</span>
+                    <div id="message1" style="display: table-row"> </div>
                 </td>
             </tr>
            <tr>
@@ -159,7 +161,7 @@
             </tr>
             <tr id="tSYear" class="hides">
                 <td align="right">学制：</td>
-                <td><select id="uSYear" name="SYear" style="width: 153px" class="easyui-validatebox"
+                <td><select id="uSYears" name="syear" style="width: 153px" class="easyui-validatebox"
                            >
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -174,7 +176,7 @@
             </tr>
             <tr id="tSyear1" class="hides">
                 <td align="right">入学年份：</td>
-                <td><select id="uSyears" name="syears" style="width: 153px" class="easyui-validatebox"
+                <td><select id="uSyear" name="syear" style="width: 153px" class="easyui-validatebox"
                            >
                     <option value="1">2017</option>
                     <option value="2">2016</option>
@@ -219,7 +221,39 @@
 
 <script type="text/javascript">
 
+    function repeat(name) {
 
+        if(/^[a-zA-Z][A-Za-z0-9_][5,29]$/.test(name.value)){
+
+            var xmlhtttp;
+            if(window.XMLHttpRequest){
+                xmlhtttp=new XMLHttpRequest();//非IE浏览器
+            }else{
+                xmlhtttp=new ActiveXObject("Microsoft.XMLHTTP");//IE浏览器
+            }
+
+
+            xmlhttp.onreadystatechange=function () {
+                if(xmlhtttp.readyState==4&& xmlhtttp.status==200){
+
+
+                    if(xmlhtttp.responseText=="true"){
+                        $("#message1").html("用户名已被占用，请重新输入！！！").css("color","red");
+                        $("#message1").style.display="";
+                    }else {
+                        $("#message1").html("恭喜您！！！用户名有效").css("color","blue");
+                        $("#message1").style.display="";
+                    }
+                }
+
+                xmlhtttp.open("post","Register.do?name="+name,true);
+                xmlhtttp.send()
+            }
+        }else {
+            $("#message1").display="none";
+        }
+        
+    }
     function submitForm() {
 
        $("#ff").form({
@@ -318,8 +352,6 @@
             $("#uRepassword").validatebox();
             $("#uIdCard").validatebox();
             $("#uMobile").validatebox();
-
-
 
             $("#tips").tooltip({//提示信息框
                 position: "bottom",

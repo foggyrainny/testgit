@@ -15,17 +15,25 @@
 <body>
 <div style="padding:3px 2px;border-bottom:1px solid #ccc">Form Validation</div>
 <form id="ff" method="post">
+    <input id="ss" class="easyui-searchbox" style="width:300px"
+           data-options="searcher:qq,prompt:'请输入搜索内容',menu:'#mm'"/><br>
     <div>
 
-        <input class="easyui-validatebox" type="text" name="name" required="true" onchange="vChange(this)"></input>
+        <input class="easyui-validatebox" type="text" name="name" required="true" onchange="vChange(this)"/>
     </div>
     <div>
 
-        <input id="ee" class="easyui-validatebox" type="text" name="email" <%--required="true"--%> <%--validType="email"--%>></input>
+        <input id="ee" class="easyui-validatebox" type="text" name="email" <%--required="true"--%> <%--validType="email"--%>/>
     </div>
     <div>
 
-        <input class="easyui-validatebox" type="text" name="subject" required="true"></input>
+        <input class="easyui-validatebox" type="text" name="subject" required="true"/>
+    </div>
+
+
+    <div id="mm" style="width:120px">
+        <div data-options="name:'all',iconCls:'icon-ok'">所有新闻</div>
+        <div data-options="name:'sports'">体育新闻</div>
     </div>
 
         <input type="submit" value="Submit" onclick="submitForm()">
@@ -33,7 +41,9 @@
 </form>
 <script type="text/javascript" >
 
-
+    function qq(value,name){
+        alert(value+":"+name)
+    }
    /* $.extend($.fn.validatebox.defaults.rules, {
         TI:{
             validator:function (value) {

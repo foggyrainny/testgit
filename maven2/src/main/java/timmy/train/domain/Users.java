@@ -1,44 +1,38 @@
 package timmy.train.domain;
 
+import javax.persistence.*;
 import java.util.Date;
-
+@Entity
+@Table(name="users")
 public class Users {
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="name")
+    private String name;//唯一的用户名
+    @Column(name = "password")
+    private String  password;//密码
+    @Column(name = "repassword")
+    private String  repassword;//确认密码
+    @Column(name = "realname")
+    private String realname;//真实姓名
+    @Column(name = "idCard")
+    private String idCard;//证件卡号
+    @Column(name = "email")
+    private String email;//邮件（非必填）
+    @Column(name = "mobile")
+    private String mobile;//手机号
+    @Column(name="customerType")
+    private int customerType;//游客类型
+    @Column(name="Country")
+    private int Country;//国籍
+    @Column(name="idCardType")
+    private int idCardType;//证件类型
+    @Column(name = "sex")
+    private int sex;//性别
+    @Column(name = "birthday")
+    private Date birthday;//生日
 
-    private int id;
-
-    private String name;
-
-    private String  password;
-
-    private String realname;
-
-    private String idCard;
-
-    private String email;
-
-    private String mobile;
-
-    private int customerType;
-
-    private String Country;
-
-    private int idCardType;
-
-    private int sex;
-
-    private Date birthday;
-
-    private String  repassword;
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public int getCustomerType() {
         return customerType;
@@ -48,11 +42,11 @@ public class Users {
         this.customerType = customerType;
     }
 
-    public String getCountry() {
+    public int getCountry() {
         return Country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(int country) {
         Country = country;
     }
 
