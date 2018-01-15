@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="timmy.train.domain" >
+<class name="Users" table="users">
+    <id name="name" column="name" type="java.lang.String">
+        <generator class="identity"></generator>
+    </id>
+    <property name="password"  type="java.lang.String">
+        <column name="password" sql-type="varchar" not-null="true"/></property>
+    <!--<property name="repassword" type="java.lang.String" >
+        <column name="repassword" sql-type="varchar" not-null="true"/>
+    </property>-->
+    <property name="realname" type="java.lang.String">
+        <column name="realname" sql-type="varchar" not-null="true"/>
+    </property>
+    <property name="idCard" type="java.lang.String">
+        <column name="idcard" sql-type="varchar" not-null="true"/>
+    </property>
+    <property name="email" type="java.lang.String">
+        <column name="email" sql-type="varchar" not-null="false"/>
+    </property>
+    <property name="mobile" type="java.lang.String">
+        <column name="mobile" not-null="true"/>
+    </property>
+    <property name="customerType" type="java.lang.Integer">
+        <column name="customerType" not-null="true"/>
+    </property>
+    <property name="Country" type="java.lang.Integer">
+        <column name="Country" not-null="false"/>
+    </property>
+    <property name="idCardType" type="java.lang.Integer">
+        <column name="idCardType" not-null="true"/>
+    </property>
+    <property name="sex" type="java.lang.Integer">
+        <column name="sex" not-null="true"/>
+    </property>
+    <property name="birthday" type="java.util.Date">
+        <column name="birthday" not-null="true"/>
+    </property>
+</class>
+</hibernate-mapping>
+
+
