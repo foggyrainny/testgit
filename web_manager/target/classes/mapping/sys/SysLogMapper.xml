@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.SysLogDao">
+ 	
+ 	<select id="getSyslogList" parameterType="com.hzdracom.manager.bean.form.SyslogForm" resultType="com.hzdracom.manager.bean.sys.SysLog">
+	 	SELECT id,account,`name`,operationtime,content,ip,op_type FROM sys_log WHERE 1=1 
+		
+		<if test="opType != null and  opType != -1 ">
+			AND op_type = #{opType}
+		</if>
+		<if test="account != null and account != ''">
+			AND account LIKE '%${account}%'
+		</if>
+		<if test="name != null and name != ''">
+			AND `name` LIKE '%web_manager%'
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND operationtime <![CDATA[>=]]> #{startTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND operationtime <![CDATA[<=]]> #{endTime}
+		</if>
+		ORDER BY id desc
+		LIMIT #{start},#{size}
+ 	</select>
+ 	
+ 	<select id="getSyslogListTotal" parameterType="com.hzdracom.manager.bean.form.SyslogForm" resultType="java.lang.Integer">
+ 		SELECT COUNT(1) FROM sys_log WHERE 1=1 
+		<if test="opType != null and opType != -1 ">
+			AND op_type = #{opType}
+		</if>
+		<if test="account != null and account != ''">
+			AND account LIKE '%${account}%'
+		</if>
+		<if test="name != null and name != ''">
+			AND `name` LIKE '%web_manager%'
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND operationtime <![CDATA[>=]]> #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND operationtime <![CDATA[<=]]> #{endTime}
+		</if>
+ 	</select>
+ 	
+ 	<insert id="insertLog" parameterType="com.hzdracom.manager.bean.sys.SysLog">
+ 		INSERT INTO sys_log(ACCOUNT,NAME,CONTENT,OPERATIONTIME,ip,op_type) values (#{account},#{name},#{content},now(),#{ip},#{opType})
+ 	</insert>
+ 	
+ 	
+</mapper>

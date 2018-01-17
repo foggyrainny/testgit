@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.OfficeDao">
+ 	
+ 	<select id="getOfficeList" parameterType="java.lang.Integer" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT id,`name`,`code`,(SELECT name_cn FROM sys_area_id a WHERE a.area_id=b.area_id) as areaName,`type`,parent_id,
+			(SELECT COUNT(*) FROM  sys_office WHERE parent_id=b.id  and is_delete = 1 ) AS hasChild 
+ 			FROM  sys_office b WHERE is_delete=1 AND parent_id=#{parentId} 
+ 	</select>
+ 	
+ 	<select id="isOffice" parameterType="com.hzdracom.manager.bean.sys.Office" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT id,`name`,`code`,area_id,`type`,parent_id FROM  sys_office b WHERE is_delete=1 AND `code`=#{code}
+ 		<if test="id != null and id !=0">
+ 			AND id <![CDATA[<>]]> #{id}
+ 		</if>
+ 	</select>
+ 	
+ 	<update id="addOffice" parameterType="com.hzdracom.manager.bean.sys.Office">
+ 		insert  into `sys_office`(`name`,`code`,`area_id`,`type`,`level`,`parent_id`,`address`,`zip_code`,`master`,`phone`,`fax`,`email`,`url`,`logo_url`,`xc_url`,`background_url`,`remark`,`is_delete`) 
+ 			values (#{name},#{code},#{areaId},#{type},#{level},#{parentId},#{address},#{zipCode},#{master},#{phone},#{fax},#{email},#{url},#{logoUrl},#{xcUrl},#{backgroundUrl},#{remark},1);
+ 	</update>
+ 	
+ 	<update id="updateOffice" parameterType="com.hzdracom.manager.bean.sys.Office">
+ 		UPDATE sys_office SET `name`=#{name},`code`=#{code},`area_id`=#{areaId},`type`=#{type},`level`=#{level},`parent_id`=#{parentId},
+		`address`=#{address},`zip_code`=#{zipCode},`master`=#{master},`phone`=#{phone},`fax`=#{fax},`email`=#{email},`url`=#{url},`logo_url`=#{logoUrl},`xc_url`=#{xcUrl},`background_url`=#{backgroundUrl},`remark`=#{remark},`is_delete`=1
+		WHERE id=#{id}
+ 	</update>
+ 	
+ 	<select id="getOffice" parameterType="java.lang.Integer" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT b.*,a.district_en,a.prov_en FROM sys_office b LEFT JOIN sys_area_id a ON a.area_id=b.area_id WHERE id=#{id}
+ 	</select>
+ 	
+ 	<select id="getParent" parameterType="java.lang.Integer" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT `id`,`name`,`parent_id` FROM `sys_office` WHERE parent_id=#{id} AND is_delete=1
+ 	</select>
+ 	
+ 	<update id="delete" parameterType="java.lang.Integer">
+ 		UPDATE sys_office SET is_delete=2 WHERE id=#{id} 
+ 	</update>
+ 	
+ 	<update id="updateOfficeParents">
+ 		<!-- UPDATE sys_office a LEFT JOIN (SELECT `id`,parent_id,@pathnodes:=IF(parent_id=0,',0',CONCAT_WS(',',IF( LOCATE( CONCAT('|',parent_id,':'),@pathall)> 0, 
+		SUBSTRING_INDEX(SUBSTRING_INDEX(@pathall,CONCAT('|',parent_id,':'),-1),'|',1),@pathnodes),parent_id))paths
+		FROM sys_office,(SELECT @le:=0,@pathlevel:='', @pathall:='',@pathnodes:='') vv ORDER BY  parent_id,id) b ON a.id=b.id SET a.parent_ids=CONCAT(b.paths,',') -->
+ 		
+ 		update sys_office ssi LEFT JOIN (
+		 SELECT id,parent_id,levels, CONCAT(parent_ids,',') parent_ids ,pathall FROM (
+		     SELECT id,parent_id,
+		
+		  @le:= IF (parent_id = 0 ,0,  
+						IF( LOCATE( CONCAT('|',parent_id,':'),@pathlevel) > 0,SUBSTRING_INDEX( SUBSTRING_INDEX(@pathlevel,CONCAT('|',parent_id,':'),-1),'|',1) +1, @le+1) ) levels
+		       , @pathlevel:= CONCAT(@pathlevel,'|',id,':', @le ,'|') pathlevel
+		
+		     ,@pathnodes:= IF( parent_id = 0 or parent_id is null ,',0', 
+		           CONCAT_WS(',',
+		           IF( LOCATE( CONCAT('|',parent_id,':'),@pathall) > 0  , 
+		               SUBSTRING_INDEX( SUBSTRING_INDEX(@pathall,CONCAT('|',parent_id,':'),-1),'|',1)
+		              ,@pathnodes ) ,parent_id  ) ) parent_ids
+		  
+		  ,@pathall:=CONCAT(@pathall,'|',id,':', @pathnodes ,'|') pathall 
+		        FROM  sys_office , 
+		    (SELECT @le:=0,@pathlevel:='', @pathall:='',@pathnodes:='') vv
+		    ORDER BY  parent_id,id
+		    ) src
+		ORDER BY id
+		)  t on t.id = ssi.id 
+		
+		set ssi.parent_ids = t.parent_ids
+		 	
+ 	</update>
+ 	
+ 	<select id="getOfficeTreeDown" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT parent_id,id,`name` FROM sys_office WHERE is_delete=1
+ 	</select>
+ 	
+ 	<select id="getOfficeTree" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		SELECT id,menu_name,parent_id FROM sys_menu WHERE is_delete=1
+ 	</select>
+ 	
+ 	
+ 	<select id="queryOfficeSelector" resultType="com.hzdracom.manager.bean.Selector">
+ 		<if test="type == 'all' or roleId   &lt;= 10 ">
+ 			SELECT id,name,parent_id FROM sys_office WHERE is_delete=1 
+ 		</if>
+ 		
+ 		<if test="type == 'role' and roleId > 10 ">
+ 			select DISTINCT o.id,o.parent_id,o.name from (
+			<!-- 先查询出全部OFFICEID -->
+				select office_id from  sys_role_office  where role_id = #{roleId}  
+			UNION
+				select ro.id from (
+				    select office_id from  sys_role_office  where role_id =  #{roleId} and level = 1 
+				) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+			) t  left join  sys_office o on o.id = t.office_id  where  t.office_id is not null  AND is_delete = 1
+	 		
+ 		</if>
+ 		
+ 		
+ 	</select>
+ 	
+ 	
+ 	
+</mapper>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-4.1.xsd 
+	http://www.springframework.org/schema/mvc 
+	http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+	http://www.springframework.org/schema/rabbit  
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.3.xsd
+    http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.1.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.1.xsd ">
+	
+	<!-- 扫描注解Bean -->
+	
+	<context:component-scan base-package="com.hzdracom.core.service.*,com.hzdracom.manager.*">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>	
+	</context:component-scan>
+	<!-- 开启AOP监听 只对当前配置文件有效 -->
+    <aop:aspectj-autoproxy expose-proxy="true"/>
+
+	<bean id="baseDataSource" class="com.alibaba.druid.pool.DruidDataSource"   abstract="true" >
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="1" />
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="20" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<!-- 用来检测连接是否有效的sql，要求是一个查询语句 -->
+		<property name="validationQuery" value="SELECT now()" />
+		<!-- 建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测， 如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效 -->
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+	
+	
+	
+	<bean id="sysDataSource" class="com.alibaba.druid.pool.DruidDataSource" parent="baseDataSource" init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="jdbc:mysql://192.168.8.235:3306/web_manager?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;zeroDateTimeBehavior=convertToNull&amp;generateSimpleParameterMetadata=true" />
+		<property name="username" value="wasu" />
+		<property name="password" value="hzlq@2016" />
+	</bean>
+	
+	<!--bean id="tmpDataSource" class="com.alibaba.druid.pool.DruidDataSource" parent="baseDataSource" init-method="init" destroy-method="close"-->
+		<!-- 基本属性 url、user、password -->
+		<!--property name="url" value="${tmp.jdbc.url}" />
+		<property name="username" value="${tmp.jdbc.username}" />
+		<property name="password" value="${tmp.jdbc.password}" />
+	</bean-->
+		
+	<!-- 指定数据源 -->
+	<bean id="dataSource" class="com.hzdracom.manager.datasource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="sys" value-ref="sysDataSource" />
+				<!--entry key="tmp" value-ref="tmpDataSource" /-->
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="sysDataSource" />
+	</bean>	
+	
+	
+	<bean id="paginationInterceptor" class="com.github.pagehelper.PageInterceptor">
+		<property name="properties">
+			<value>
+				helperDialect=mysql
+                reasonable=true
+                supportMethodsArguments=true
+                params=count=countSql
+                autoRuntimeDialect=true
+			</value>
+		</property>
+	</bean>
+	
+	<!-- 为业务逻辑层的方法解析@DataSource注解 为当前线程的routeholder注入数据源key -->
+	<bean id="sourceAspect" class="com.hzdracom.manager.datasource.DataSourceAspect"></bean>
+	
+	<!-- dao层 调用 datasource -->
+	<aop:config proxy-target-class="true">
+		<aop:aspect ref="sourceAspect">
+			<aop:pointcut id="sys" expression="execution(* com.hzdracom.manager.dao..*.*(..))" />
+			<aop:before method="setSysDataSource" pointcut-ref="sys" />
+			<!-- 数据库切换， 用完后  切换到采集数据库  cj -->
+			<!--aop:pointcut id="tmp"  expression="execution(* com.hzdracom.manager.dao.uls..*.*(..))" />
+			<aop:before method="setTmpDataSource" pointcut-ref="tmp" />
+			<aop:after-returning method="setSysDataSource" pointcut-ref="tmp" /-->
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="plugins">
+			<array>
+				<ref bean="paginationInterceptor" />
+			</array>
+		</property>
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:MybatisConfig.xml"/>
+		<property name="mapperLocations" value="classpath*:mapping/*/*.xml"/>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.hzdracom.dao,com.hzdracom.manager.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+
+	<!-- 注解方式配置事务 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager" /> -->
+	
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 拦截器方式配置事务 -->
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="import*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="add*" propagation="REQUIRED"      rollback-for="java.lang.Exception" />
+			<tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="create*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="delete*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="batchInsert*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+			<tx:method name="batchUpdate*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="batchDelete*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<!-- 以下不能加， 加了数据库 切换就出问题了 -->
+			<!-- <tx:method name="*" propagation="NOT_SUPPORTED" /> -->
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="transactionPointcut" expression="execution(* com.hzdracom.manager.service..*.*(..))" />
+		<aop:advisor pointcut-ref="transactionPointcut" advice-ref="transactionAdvice" />
+	</aop:config>
+
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" scope="singleton">
+		<constructor-arg ref="dataSource" />
+	</bean>
+		
+		<!--start 定义国际化消息 -->  
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">  
+        <property name="useCodeAsDefaultMessage" value="true" />  
+         <property name="defaultEncoding" value="UTF-8"/>  
+        <!--  根据时间自动读取properties文件-->
+        <property name="cacheSeconds" value="5"></property>
+        <!-- 其中basename用来指定properties文件的通用名  -->  
+        <property name="basename" value="/WEB-INF/classes/i18n/message" />  
+    </bean> 
+	
+</beans>
