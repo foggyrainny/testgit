@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<!-- 
+	SSH(Spring mvc + Spring + hibernate)  maven整合
+	整合步骤：
+	1、在pom.xml中配置框架及支持包的坐标
+		spring + spring mvc
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>4.2.4.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>4.2.4.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>4.2.4.RELEASE</version>
+			</dependency>		
+			
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>4.2.4.RELEASE</version>
+			</dependency>
+			<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>4.2.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.8.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		hibernate
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>4.2.2.Final</version>
+			</dependency>
+		支持包坐标
+			数据源、mysql驱动、apache工具包、joda-time日期工具包、servlet-api
+	
+	2、在项目的入口配置文件(web.xml)中进行spring+spring mvc配置
+		spring
+			<context-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value>classpath:applicationContext.xml</param-value>
+			</context-param>			
+			<listener>
+				<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+			</listener>
+			<listener>
+				<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+			</listener> 
+		spring mvc		
+			<servlet>  
+		        <servlet-name>spring-mvc</servlet-name>  
+		        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>  
+		
+		    	<init-param>
+		             <param-name>contextConfigLocation</param-name>
+		             <param-value>classpath:spring-mvc.xml</param-value>
+		         </init-param>
+		    	<load-on-startup>1</load-on-startup>
+		    </servlet>
+		
+		    <servlet-mapping>  
+		        <servlet-name>spring-mvc</servlet-name>  
+		        <url-pattern>*.action</url-pattern>  
+		    </servlet-mapping> 
+	3、配置spring主配置文件applicationContext.xml + spring-mvc.xml		
+
+	4、编写实体类 (+注解)
+	
+	5、编写dao接口及实现
+	
+	6、编写service接口及实现
+	
+	7、编写Controller实现
+	
+	8、编写页面
+	
+	9、调试运行
+	
+	------------------------------------------------------
+	ssh(spring mvc + spring + hibernate)
+		通用型的代码，需要使用泛型技术来编码
+		考虑代码的复用性、可扩展性、可维护性
+		基于基本原则：面向接口编程
+	
+	1、dao层  CoreDao   CoreDaoImpl
+		CRUD: 添加、修改、删除可以作为公共代码
+			  查询不能作为公共代码，可以预留接口 （因为每个模块的查询条件不一样，没办法进行统一）
+		接口的方法可以统一、接口的实现类处理方法可以统一
+		一部分可以通用实现；一部分留给模块应用开发人员来实现
+		CoreDaoImpl  考虑有抽象类
+		
+	2、service层  CoreService   CoreServiceImpl
+		servcie接口要统一，其他需求，子接口可以扩展方法
+		CoreServiceImpl实现 部分通用实现，部分提供接口方法，等待子类来实现
+	
+	3、Controller控制层   CoreController
+		WebSiteController  系统前台的父控制器
+		AdminController    系统后台的父控制器
+		设计一个顶层的控制器类：重点解决控制器中通用代码的集中编写
+			1、日期问题解决
+			2、获取ip地址
+			3、附件上传
+			4、用户session的获取
+			5、导航条信息
+			6、其他模块都要调用核心模块
+	4、领域层/实体层    CoreEntity
+		设计一个实体层的父类，把公共的属性、方法(getter/setter)集中编写
+			1、查询参数（数据库对应的表中没有的属性）map
+			2、分页参数（firstRow， RowCount）
+			3、通用属性
+	5、工具类
+		针对某一个技术问题的解决方案工具，工具类一般是用静态方法
+			1、ip地址
+			2、加密、解密
+			3、附件
+			4、分类
+			5、日期通用实现
+			6、字符串、json
+			.....
+	6、页面
+		1、命名规范   
+			模块名/list.jsp  input.jsp   view.jsp
+		2、taglib.jsp 
+		
+		3、jquery验证
+		
+		4、分页
+		
+		5、查询条件
+		
+		jsp    js
+		
+		
+-->
+</body>
+</html>
