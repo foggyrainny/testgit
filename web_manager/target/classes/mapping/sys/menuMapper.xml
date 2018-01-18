@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.MenuDao">
+ 	
+ 	
+ 	<select id="qryMenuList" parameterType="com.hzdracom.manager.bean.sys.Menu" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT a.id,a.parent_id,a.menu_name,a.menu_url,a.is_html_element,a.html_code,a.is_show,a.modify_time,a.remark,a.sort_num,
+ 			b.menu_name AS gf_parent_name,(SELECT COUNT(*) FROM sys_menu WHERE parent_id=a.id) childs 
+ 		FROM sys_menu a LEFT OUTER JOIN sys_menu b ON b.id =a.parent_id AND b.is_delete=1 
+ 		WHERE a.is_delete=1 AND a.parent_id=#{parentId}
+ 		order by a.sort_num asc,a.id desc 
+ 	</select>
+ 	
+ 	<select id="qryMenuAll" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT a.id,a.parent_id,a.menu_name,a.menu_name_en,a.menu_url,a.is_html_element,a.html_code,a.is_show,a.modify_time,a.remark,a.sort_num,
+ 			b.menu_name AS gf_parent_name,(SELECT COUNT(*) FROM sys_menu WHERE parent_id=a.id) childs 
+ 		FROM sys_menu a LEFT OUTER JOIN sys_menu b ON b.id =a.parent_id AND b.is_delete=1 
+ 		WHERE a.is_delete=1 order by a.sort_num asc,a.id desc
+ 	</select>
+ 	
+ 	<select id="qryMenu" parameterType="com.hzdracom.manager.bean.sys.Menu" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT a.id,a.menu_name,a.menu_name_en,a.menu_url,a.sort_num,a.is_html_element,a.html_code,a.is_show,a.remark,a.parent_id,b.menu_name AS parent_name,a.create_time,a.modify_time 
+ 		FROM sys_menu a LEFT OUTER JOIN sys_menu b ON b.id =a.parent_id AND b.is_delete=1 WHERE a.is_delete=1 AND a.id=#{id}
+ 	</select>
+ 	
+ 	<insert id="addMenu" parameterType="com.hzdracom.manager.bean.sys.Menu">
+ 		insert into sys_menu(menu_name,menu_name_en,parent_id,menu_url,sort_num,is_html_element,html_code,remark,is_show,create_time,modify_time) 
+ 		values(#{menuName},#{menuNameEn},#{parentId},#{menuUrl},#{sortNum},#{isHtmlElement},#{htmlCode},#{remark},#{isShow},now(),now())
+ 	</insert>
+ 	
+ 	<update id="updateMenu" parameterType="com.hzdracom.manager.bean.sys.Menu">
+ 		update sys_menu set menu_name=#{menuName},menu_name_en=#{menuNameEn},parent_id=#{parentId},menu_url=#{menuUrl},sort_num=#{sortNum},is_html_element=#{isHtmlElement},
+ 			html_code=#{htmlCode},remark=#{remark},is_show=#{isShow},modify_time=now() where id=#{id}
+ 	</update>
+ 	
+ 	<select id="isMenu" parameterType="java.lang.Integer" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT id,menu_name,parent_id FROM `sys_menu` WHERE parent_id=#{id} AND is_delete=1
+ 	</select>
+ 	 	
+ 	<update id="delMenu" parameterType="java.lang.Integer">
+ 		UPDATE sys_menu SET is_delete=2,modify_time=NOW() WHERE id=#{id}
+ 	</update>
+ 	
+ 	<select id="getLeftMenu" parameterType="java.lang.String" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT DISTINCT a.id,a.parent_id,a.menu_name,a.menu_name_en,a.menu_url,a.html_code,is_show,sort_num FROM sys_menu a INNER JOIN sys_role_menu b ON b.menu_id=a.id 
+ 		INNER JOIN sys_role c ON c.id=b.role_id INNER JOIN sys_user_role d ON d.role_id=c.id 
+ 		INNER JOIN sys_user e ON e.id=d.user_id WHERE  a.is_delete=1  AND e.id=#{userId} ORDER BY a.sort_num
+ 	</select>
+ 	
+ 	<select id="getAllMenus" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT DISTINCT id,menu_name,menu_url,menu_name_en,parent_id,html_code,is_show,sort_num FROM sys_menu 
+ 		WHERE is_delete=1 ORDER BY sort_num
+ 	</select>
+ 	
+ 	<select id="getMenuEntity" parameterType="java.lang.String" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		select * from sys_menu where 1=1 and menu_url =#{menuUrl}  limit  1
+ 	</select>
+</mapper>

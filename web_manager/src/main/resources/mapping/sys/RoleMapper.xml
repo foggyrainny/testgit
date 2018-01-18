@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.RoleDao">
+ 	
+ 	<select id="getRoleList" parameterType="com.hzdracom.manager.bean.form.RoleForm" resultType="com.hzdracom.manager.bean.sys.Role">
+ 		SELECT a.id,a.role_name,b.name officeName,a.role_level,a.create_time
+		FROM sys_role a LEFT JOIN sys_office b ON a.office_id=b.id
+		WHERE del_flag=0 
+		<if test="!dataAuth.supperAdmin">
+			AND b.id IN (select DISTINCT * from (select office_id from  sys_role_office  where role_id = #{dataAuth.roleId} UNION
+				select ro.id from (select office_id from  sys_role_office  where role_id =  #{dataAuth.roleId} and level = 1 
+				) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+				) t where office_id is not null
+			)
+		</if>
+		<if test="roleName != null and roleName != ''">
+			AND a.role_name LIKE '%${roleName}%'
+		</if>
+		<if test="officeId != null and officeId != ''">
+			AND b.id = #{officeId}
+		</if>
+		order by a.create_time desc
+		LIMIT #{start},#{size}
+ 	</select>
+ 	
+ 	<select id="getRoleListTotal" parameterType="com.hzdracom.manager.bean.form.RoleForm" resultType="java.lang.Integer">
+ 		SELECT COUNT(1) 
+		FROM sys_role a LEFT JOIN sys_office b ON a.office_id=b.id
+		WHERE del_flag=0
+		<if test="!dataAuth.supperAdmin">
+			AND b.id IN (select DISTINCT * from (select office_id from  sys_role_office  where role_id = #{dataAuth.roleId} UNION
+				select ro.id from (select office_id from  sys_role_office  where role_id =  #{dataAuth.roleId} and level = 1 
+				) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+				) t where office_id is not null
+			)
+		</if>
+		<if test="roleName != null and roleName != ''">
+			AND a.role_name LIKE '%${roleName}%'
+		</if>
+		<if test="officeId != null and officeId != ''">
+			AND b.id = #{officeId}
+		</if>
+ 	</select>
+ 	
+ 	<select id="getMenuList" parameterType="com.hzdracom.manager.bean.DataAuthority" resultType="com.hzdracom.manager.bean.sys.Menu">
+ 		SELECT id,menu_name `name`,parent_id FROM sys_menu WHERE is_delete=1
+ 		<if test="!supperAdmin">
+ 			AND id IN (SELECT menu_id FROM `sys_role_menu` WHERE role_id=#{roleId})
+ 		</if>
+ 	</select>
+ 	
+ 	<select id="getOfficeList" parameterType="com.hzdracom.manager.bean.DataAuthority" resultType="com.hzdracom.manager.bean.sys.Office">
+ 		<!-- SELECT id,`name`,parent_id FROM sys_office WHERE is_delete = 1
+ 		<if test="!supperAdmin">
+			AND id IN (SELECT office_id FROM `sys_role_office` WHERE role_id=#{roleId})
+		</if>
+		order by parent_id,parent_ids,name -->
+		
+		<if test="supperAdmin">
+			SELECT id,`name`,parent_id FROM sys_office WHERE is_delete = 1
+			order by parent_id,parent_ids,name
+		</if>
+		
+		<if test="!supperAdmin">
+		select  id,`name`,parent_id,parent_ids FROM sys_office  where id in(
+					select office_id from  sys_role_office  where role_id =  #{roleId}
+				UNION
+					select ro.id from (
+					    select office_id from  sys_role_office  where role_id =  #{roleId} and level = 1 
+					) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+	        where is_delete = 1
+		) and is_delete = 1
+			order by parent_id,parent_ids,name
+			
+		</if>
+		
+ 	</select>
+ 	
+ 	
+ 	<insert id="addRole" parameterType="com.hzdracom.manager.bean.sys.Role" useGeneratedKeys="true" keyProperty="id">
+ 		INSERT INTO sys_role(role_name,office_id,create_by,del_flag,create_time) VALUES(#{roleName},#{officeId},#{createBy},0,NOW())
+ 	</insert>
+ 	
+ 	<update id="updateRole" parameterType="com.hzdracom.manager.bean.sys.Role">
+ 		UPDATE sys_role SET role_name=#{roleName},office_id=#{officeId},update_by=#{updateBy},modify_time=NOW() WHERE id=#{id}
+ 	</update>
+ 	
+ 	<update id="deleteMenus"  parameterType="com.hzdracom.manager.bean.sys.Role">
+ 		DELETE FROM sys_role_menu WHERE role_id=#{id}
+ 	</update>
+ 	
+ 	<update id="deleteOffice"  parameterType="com.hzdracom.manager.bean.sys.Role">
+ 		DELETE FROM sys_role_office WHERE role_id=#{id}
+ 	</update>
+ 	
+ 	<insert id="addMenus" parameterType="com.hzdracom.manager.bean.sys.Role">
+ 		INSERT INTO sys_role_menu(role_id,menu_id) VALUES
+ 		<foreach collection="menuList" item="k" index="index" open="" close="" separator=",">
+ 			(#{id},#{k})
+ 		</foreach>
+ 	</insert>
+ 	
+ 	<insert id="addOffice" parameterType="com.hzdracom.manager.bean.sys.Role">
+ 		INSERT INTO sys_role_office(role_id,office_id,`level`) VALUES
+ 		<foreach collection="officeList" item="k" index="index" open="" close="" separator=",">
+ 			(#{id},#{k.officeId},#{k.level})
+ 		</foreach>
+ 	</insert>
+ 	
+ 	<select id="getRole" parameterType="java.lang.Integer" resultType="com.hzdracom.manager.bean.sys.Role">
+ 		SELECT id,role_name,office_id,(SELECT GROUP_CONCAT(menu_id) FROM sys_role_menu WHERE role_id = r.id) menus,
+		(SELECT GROUP_CONCAT(concat(office_id,'-',level)) FROM sys_role_office WHERE role_id = r.id) offices
+		FROM sys_role r WHERE id=#{id}
+ 	</select>
+ 	
+ 	<select id="isRole" parameterType="com.hzdracom.manager.bean.sys.Role" resultType="com.hzdracom.manager.bean.sys.Role">
+ 		SELECT * FROM `sys_role` WHERE role_name = #{roleName} AND del_flag=0
+ 		<if test="id != null and id != 0">
+ 			AND id <![CDATA[ <> ]]> #{id}
+ 		</if>
+ 	</select>
+ 	
+ 	
+ 	<!-- 查询数据权限 -->
+ 	<select id="queryRoleOfficeIds"  resultType="java.lang.Integer">
+		select DISTINCT * from (
+		<!-- 先查询出全部OFFICEID -->
+			select office_id from  sys_role_office  where role_id = #{0}  
+		UNION
+			select ro.id from (
+			    select office_id from  sys_role_office  where role_id =  #{0} and level = 1 
+			) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+		) t where office_id is not null 
+ 	</select>
+ 	
+ 	<select id="selectRoleUser" parameterType="java.lang.String" resultType="java.lang.Integer">
+ 		SELECT COUNT(1) count FROM `sys_user` WHERE del_flag=0 AND id IN (SELECT user_id FROM `sys_user_role` WHERE role_id=#{roleId})
+ 	</select>
+ 	
+ 	<update id="delete" parameterType="java.lang.String">
+ 		UPDATE `sys_role` SET del_flag=1 WHERE id=#{roleId}
+ 	</update>
+ 	
+</mapper>

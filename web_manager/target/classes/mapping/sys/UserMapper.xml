@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.UserDao2">
+ 	
+ 	<select id="getUserList" parameterType="com.hzdracom.manager.bean.form.UserForm" resultType="com.hzdracom.manager.bean.sys.User">
+ 		SELECT u.id,u.login_name,u.user_name,r.role_name,o.name,o2.name parentName,u.modify_time,u.create_time,u.login_ip,u.login_time FROM sys_user u 
+			LEFT JOIN sys_user_role ur ON u.id=ur.user_id
+			LEFT JOIN sys_role r ON ur.role_id=r.id 
+			LEFT JOIN sys_office o ON u.office_id=o.id
+			LEFT JOIN sys_office o2 ON o.parent_id=o2.id
+		WHERE u.del_flag=0 AND r.del_flag=0 AND o.`is_delete`=1 
+		<if test="!dataAuth.supperAdmin">
+			AND o.id IN (
+				select DISTINCT * from (select office_id from  sys_role_office  where role_id = #{dataAuth.roleId} UNION
+				select ro.id from (select office_id from  sys_role_office  where role_id =  #{dataAuth.roleId} and level = 1 
+				) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+				) t where office_id is not null
+			)
+		</if>
+		<if test="officeId != null and officeId != ''">
+			AND u.office_id=#{officeId} 
+		</if>
+		<if test="loginName != null and loginName != ''">
+			AND login_name LIKE '%${loginName}%'
+		</if>
+		<if test="userName != null and userName != ''">
+			AND user_name LIKE '%${userName}%'
+		</if>
+		order by u.modify_time desc
+		LIMIT #{start},#{size}
+ 	</select>
+ 	
+ 	<select id="getUserListTotal" parameterType="com.hzdracom.manager.bean.form.UserForm" resultType="java.lang.Integer">
+ 		SELECT COUNT(1) FROM sys_user u 
+			LEFT JOIN sys_user_role ur ON u.id=ur.user_id
+			LEFT JOIN sys_role r ON ur.role_id=r.id 
+			LEFT JOIN sys_office o ON u.office_id=o.id
+			LEFT JOIN sys_office o2 ON o.parent_id=o2.id
+		WHERE u.del_flag=0 AND r.del_flag=0 AND o.`is_delete`=1 
+		<if test="!dataAuth.supperAdmin">
+			AND o.id IN (
+				select DISTINCT * from (select office_id from  sys_role_office  where role_id = #{dataAuth.roleId} UNION
+				select ro.id from (select office_id from  sys_role_office  where role_id =  #{dataAuth.roleId} and level = 1 
+				) o  LEFT JOIN  sys_office ro on  ro.parent_ids  LIKE concat('%,',o.office_id,",%")
+				) t where office_id is not null
+			)
+		</if>
+		<if test="officeId != null and officeId != ''">
+			AND u.office_id=#{officeId} 
+		</if>
+		<if test="loginName != null and loginName != ''">
+			AND login_name LIKE '%${loginName}%' 
+		</if>
+		<if test="userName != null and userName != ''">
+			AND user_name LIKE '%${userName}%' 
+		</if>
+ 	</select>
+ 	
+ 	<insert id="addUser" parameterType="com.hzdracom.manager.bean.sys.User" useGeneratedKeys="true" keyProperty="id">
+ 		INSERT INTO sys_user(user_name,office_id,login_name,`password`,email,telephone,phone,create_time,modify_time,create_by,del_flag)
+		VALUES(#{userName},#{officeId},#{loginName},#{password},#{email},#{telephone},#{phone},NOW(),NOW(),#{createBy},0)
+ 	</insert>
+ 	
+ 	<insert id="addUserRole" parameterType="com.hzdracom.manager.bean.sys.User">
+ 		INSERT INTO `sys_user_role`(user_id,role_id) VALUES(#{id},#{roleId})
+ 	</insert>
+ 	
+ 	<update id="delUserRole" parameterType="com.hzdracom.manager.bean.sys.User">
+ 		DELETE FROM `sys_user_role` WHERE user_id=#{id}
+ 	</update>
+ 	
+ 	<select id="getLoginName" parameterType="com.hzdracom.manager.bean.sys.User" resultType="com.hzdracom.manager.bean.sys.User">
+ 		SELECT user_name,office_id,login_name,`password`,email,telephone,phone FROM sys_user WHERE login_name=#{loginName}
+ 		<if test="id != null and id != ''">
+ 			AND id <![CDATA[ <> ]]> #{id}
+ 		</if>
+ 			AND del_flag=0
+ 	</select>
+ 	
+ 	<select id="selLoginname" parameterType="String" resultType="int">
+ 		SELECT COUNT(1) FROM sys_user WHERE login_name=#{loginName} and del_flag=0
+ 	</select>
+ 	
+ 	<update id="update"  parameterType="com.hzdracom.manager.bean.sys.User">
+ 		UPDATE sys_user SET user_name=#{userName},office_id=#{officeId},email=#{email},
+ 			telephone=#{telephone},phone=#{phone},modify_time=NOW(),
+ 			<if test="password != null and password != ''">
+ 				`password`=#{password},
+ 			</if>
+ 			update_by=#{updateBy}
+		WHERE id=#{id}
+ 	</update>
+ 	
+ 	<select id="roleSelect" parameterType="java.lang.String" resultType="com.hzdracom.manager.bean.sys.Role">
+ 		<!-- SELECT id,role_name FROM `sys_role` WHERE id IN(
+			SELECT role_id FROM `sys_role_office` WHERE office_id=#{officeId}
+		) AND del_flag=0 -->
+		
+		SELECT a.id,a.role_name
+		FROM sys_role a LEFT JOIN sys_office b ON a.office_id=b.id
+		WHERE del_flag=0 AND b.id = #{officeId}
+ 	</select>
+ 	
+ 	<select id="getUser" parameterType="java.lang.String" resultType="com.hzdracom.manager.bean.sys.User">
+ 		SELECT a.*,r.`id` roleId FROM `sys_user` a 
+		LEFT JOIN `sys_user_role` b ON a.`id`=b.`user_id` 
+		LEFT JOIN `sys_role` r ON b.role_id=r.`id`
+		WHERE r.del_flag=0 AND a.id=#{userId}
+ 	</select>
+ 	
+ 	<update id="delete" parameterType="java.lang.String">
+ 		UPDATE `sys_user` SET del_flag=1 WHERE id=#{userId}
+ 	</update>
+ 	
+ 	<update id="updateUserLoginIp" >
+ 		UPDATE `sys_user` SET login_ip=#{ip},login_time = now() WHERE id=#{userId}
+ 	</update>
+ 	
+ 	
+ 	<select id="login"  resultType="com.hzdracom.manager.bean.sys.User">
+ 		 select  u.*,r.id roleId,r.role_name roleName from   sys_user  u  
+			LEFT JOIN  sys_user_role ur on u.id = ur.user_id  
+			LEFT JOIN  sys_role  r  on  ur.role_id = r.id  
+		where  login_name = #{account} and  password = #{pwd}  and u.del_flag = 0  and  r.del_flag = 0  limit 1
+ 	</select>
+ 	
+ 	<update id="updateUserInfo" parameterType="com.hzdracom.manager.bean.form.UserSettiingForm">
+ 		
+ 		UPDATE sys_user SET email=#{email},telephone=#{telephone},phone=#{phone},modify_time=NOW(),
+ 			<if test="password != null and password != ''">
+ 				`password`=#{password},
+ 			</if>
+ 			update_by=#{updateBy}
+		WHERE id=#{id}
+ 	</update>
+ 	
+ 	
+ 	<select id="querySupperAdminUserId"  resultType="java.lang.String">
+ 			select  user_id from sys_user_role  where  role_id  <![CDATA[ <= ]]>  1
+ 	</select>
+ 	
+</mapper>

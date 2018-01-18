@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hzdracom.manager.dao.sys.AreaDao">
+ 	
+ 	<select id="queryAreaNames" parameterType="com.hzdracom.manager.bean.sys.Area"   resultType="com.hzdracom.manager.bean.sys.Area">
+ 		
+ 	<!-- 	name  县
+ 		district  市区
+ 		prov  省
+ 		 -->
+ 		 
+ 		 <if test="areaId != null  ">
+ 			select  *  from sys_area_id	  where area_Id = #{areaId}  order by area_id	
+ 		</if>
+ 		 
+ 		 
+ 		<if test="areaId == null and districtEn == null and provEn == null">
+	 		SELECT DISTINCT prov_en, prov_cn FROM sys_area_id ORDER BY prov_en	
+<!-- 			select  DISTINCT  prov_en ,prov_cn from 	sys_area_id	 order by area_id	 -->
+ 		</if>
+ 		<if test="areaId == null and provEn != null  ">
+ 			 select  DISTINCT  district_en , district_cn from  sys_area_id	where prov_en = #{provEn}  order by district_en
+ 			<!-- select  DISTINCT  district_en , district_cn from  sys_area_id	where prov_en = #{provEn}  order by area_id	 -->
+ 		</if>
+ 		<if test="areaId == null and districtEn != null  ">
+ 			select  *  from sys_area_id	  where district_en = #{districtEn}  order by area_id	
+ 		</if>
+ 		
+ 		
+ 		
+ 		
+ 	</select>
+ 	
+ 	<select id="getAreaTreeDown" resultType="com.hzdracom.manager.bean.sys.Area">
+ 		SELECT DISTINCT prov_en id,prov_cn `name`,'0' parentId FROM sys_area_id
+		UNION 
+		SELECT DISTINCT district_en id,district_cn `name`,prov_en parentId FROM sys_area_id
+		UNION 
+		SELECT area_id id,name_cn `name`,district_en parentId FROM sys_area_id
+ 	</select>
+ 	
+ 	<select id="getAreaList" parameterType="com.hzdracom.manager.bean.sys.Area" resultType="com.hzdracom.manager.bean.sys.Area">
+	 	SELECT * FROM (SELECT DISTINCT CONCAT(prov_en,'0') id,prov_cn `name`,'0' parentId,'-' longitude,'-' latitude,1 hasChild FROM sys_area_id
+		
+		<if test="nameCn != null and nameCn != ''">
+			 where   prov_cn  Like '%${nameCn}%' OR  district_cn Like '%${nameCn}%'   or name_cn  Like '%${nameCn}%' 
+		</if>
+		UNION 
+		SELECT DISTINCT CONCAT(district_en,'1') id,district_cn `name`,CONCAT(prov_en,'0') parentId,'-' longitude,'-' latitude,1 hasChild FROM sys_area_id
+		<if test="nameCn != null and nameCn != ''">
+			 where   prov_cn  Like '%${nameCn}%' OR  district_cn Like '%${nameCn}%'   or name_cn  Like '%${nameCn}%' 
+		</if>
+		UNION 
+		SELECT area_id id,name_cn `name`,CONCAT(district_en,'1') parentId,longitude,latitude,0 hasChild FROM sys_area_id
+		<if test="nameCn != null and nameCn != ''">
+			 where   prov_cn  Like '%${nameCn}%' OR  district_cn Like '%${nameCn}%'   or name_cn  Like '%${nameCn}%' 
+		</if>
+		) tb 
+		WHERE 1 = 1
+		
+		<!-- 存在名称 -->
+		<if test="parentId != null and parentId != ''">
+			AND parentId = '${parentId}' 
+		</if>
+		
+		order by name 
+		
+ 	</select>
+
+ 	
+</mapper>
