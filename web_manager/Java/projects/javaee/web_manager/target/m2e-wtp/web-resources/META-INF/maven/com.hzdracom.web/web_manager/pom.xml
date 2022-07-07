@@ -12,7 +12,7 @@
 		<dubbo_version>3.0.1</dubbo_version>
 		<zookeeper_version>3.4.8</zookeeper_version>
 		<zkclient_version>0.8</zkclient_version>
-		<org.springframework-version>4.2.5.RELEASE</org.springframework-version>
+		<org.springframework-version>5.2.21.RELEASE</org.springframework-version>
 		<slf4j_version>1.7.7</slf4j_version>
 	</properties>
 
